@@ -1,6 +1,5 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {AuthService} from "./auth.service";
 import {Goal, UserWithGoals} from "../shared/models";
 import {Observable} from "rxjs";
 
@@ -16,7 +15,6 @@ const USERS_WITH_GOALS_PATH = '/usersWithGoals';
   providedIn: 'root', // This makes AuthService available throughout the application
 })
 export class UsersWithGoalsService {
-  authService = inject(AuthService);
   http = inject(HttpClient);
 
   createUserWithDefaultGoals(id: string, name: string): Observable<{ name: string }> {

@@ -1,4 +1,4 @@
-import {Component, NgZone, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component,  OnDestroy, OnInit} from '@angular/core';
 import {
   MatCard,
   MatCardActions,
@@ -22,7 +22,7 @@ import {MatIcon} from "@angular/material/icon";
 import {MatInput, MatInputModule} from "@angular/material/input";
 import {MatList, MatListItem} from "@angular/material/list";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {BehaviorSubject, Subscription, take} from "rxjs";
+import {BehaviorSubject, Subscription} from "rxjs";
 import {CdkTextareaAutosize, TextFieldModule} from "@angular/cdk/text-field";
 import {MatSelectModule} from "@angular/material/select";
 
@@ -61,11 +61,11 @@ import {MatSelectModule} from "@angular/material/select";
   ],
   template: `
     <div style="margin-left: 30px">
-      <h1>Hey {{ this.userWithGoals?.name }}!</h1>
+      <h1>Hey {{ userWithGoals?.name }}!</h1>
       <h3>Here, you can view and edit your goals and add new ones.</h3>
     </div>
     <div style="display: flex;  flex-wrap: wrap">
-      <!-- TODO add goal -->
+      <!-- Add goal -->
       <mat-card style="width: 300px; min-height: 250px; margin: 30px; padding: 20px">
         <mat-card-content>
           <form [formGroup]="addGoalForm" (ngSubmit)="onAddGoal()">
@@ -93,7 +93,7 @@ import {MatSelectModule} from "@angular/material/select";
           </form>
         </mat-card-content>
       </mat-card>
-      <!-- TODO display & edit goal -->
+      <!-- Display & edit goal -->
       <div *ngFor="let goal of userWithGoals?.goals">
         <mat-card style="width: 300px; min-height: 250px; margin: 30px; padding: 20px">
           <mat-list-item *ngIf="!goal.editing">
@@ -111,7 +111,7 @@ import {MatSelectModule} from "@angular/material/select";
           </mat-list-item>
           <mat-list-item *ngIf="goal.editing">
             <mat-card-content>
-              <form [formGroup]="editGoalForm" (ngSubmit)="onEditGoal()">
+              <form [formGroup]="editGoalForm" (ngSubmit)="onSaveGoal(goal)">
                 <mat-form-field [appearance]="'outline'" style="width: 100%">
                   <mat-label>Goal</mat-label>
                   <input matInput formControlName="goalName" placeholder="Insert name">
@@ -126,19 +126,17 @@ import {MatSelectModule} from "@angular/material/select";
 
                 <mat-form-field [appearance]="'outline'" style="width: 100%">
                   <mat-label>Date</mat-label>
-                  <mat-label>Date</mat-label>
                   <input matInput formControlName="date" [matDatepicker]="datePicker">
                   <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
                   <mat-datepicker #datePicker></mat-datepicker>
-
                 </mat-form-field>
                 <div style="display: flex; justify-content: space-around">
-                  <button type="submit" mat-raised-button color="primary" aria-label="Add a goal" style="width: 45%"
-                  >Save
+                  <button type="submit" mat-raised-button color="primary" aria-label="Save goal" style="width: 45%">
+                    Save
                   </button>
                   <button type="button" (click)="cancelEdit(goal)" mat-raised-button color="warn"
-                          aria-label="Add a goal" style="width: 45%"
-                  >Cancel
+                          aria-label="Cancel editing" style="width: 45%">
+                    Cancel
                   </button>
                 </div>
               </form>
@@ -151,24 +149,28 @@ import {MatSelectModule} from "@angular/material/select";
 })
 export class HomeComponent implements OnInit, OnDestroy {
   userWithGoals!: UserWithGoals;
+  editGoalForm: FormGroup;
+
+  private userWithGoalsSubject: BehaviorSubject<UserWithGoals>;
+  private userWithGoalsSubscription: Subscription | undefined;
+
   addGoalForm = new FormGroup({
     goalName: new FormControl('', Validators.required),
     description: new FormControl(''),
     date: new FormControl('')
   });
-  editGoalForm = new FormGroup({
-    goalName: new FormControl('', Validators.required),
-    description: new FormControl(''),
-    date: new FormControl('')
-  });
-  private userWithGoalsSubject: BehaviorSubject<UserWithGoals>;
-  private userWithGoalsSubscription: Subscription | undefined;
 
-  constructor(private route: ActivatedRoute, private usersWithGoalsService: UsersWithGoalsService, private _ngZone: NgZone) {
+  constructor(
+    private route: ActivatedRoute,
+    private usersWithGoalsService: UsersWithGoalsService,
+  ) {
     this.userWithGoalsSubject = new BehaviorSubject<UserWithGoals>(this.userWithGoals);
+    this.editGoalForm = new FormGroup({
+      goalName: new FormControl('', Validators.required),
+      description: new FormControl(''),
+      date: new FormControl('')
+    });
   }
-
-
 
   ngOnInit(): void {
     this.usersWithGoalsService.getUser(this.route.snapshot.params['id']).subscribe({
@@ -181,11 +183,15 @@ export class HomeComponent implements OnInit, OnDestroy {
       error: (error: any) => {
         console.error('Error on getting user:', error);
       }
-    })
+    });
 
     this.userWithGoalsSubscription = this.userWithGoalsSubject.subscribe(userWithGoals => {
       if (userWithGoals) {
         this.userWithGoals = userWithGoals;
+        const editedGoal = this.userWithGoals.goals.find(goal => goal.editing);
+        if (editedGoal) {
+          this.populateEditForm(editedGoal);
+        }
       }
     });
   }
@@ -195,34 +201,44 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   onAddGoal() {
-      const name = this.addGoalForm.value.goalName;
-      const description = this.addGoalForm.value.description;
-      const date = this.addGoalForm.value.date;
-      if (name && description && date) {
-        this.userWithGoals?.goals?.unshift({ name, description, date: new Date(date), editing: false });
-        this.updateUserWithGoals();
-        this.addGoalForm.reset();
-      }
-  }
-
-
-  onEditGoal(goal?: Goal) {
-    if(goal){
-    goal.editing = true;
+    const name = this.addGoalForm.value.goalName;
+    const description = this.addGoalForm.value.description;
+    const date = this.addGoalForm.value.date;
+    if (name && description && date) {
+      this.userWithGoals?.goals?.unshift({ name, description, date: new Date(date), editing: false });
+      this.updateUserWithGoals();
+      this.addGoalForm.reset();
     }
   }
 
-  saveGoal(goal: Goal) {
-    goal.editing = false;
-    this.updateUserWithGoals();
+  onEditGoal(goal?: Goal) {
+    if (goal) {
+      goal.editing = true;
+      this.populateEditForm(goal);
+    }
+  }
+
+  onSaveGoal(goal: Goal) {
+    if (goal) {
+      this.updateUserWithGoals();
+      goal.editing = false;
+    }
   }
 
   cancelEdit(goal: Goal) {
     goal.editing = false;
-    this.editGoalForm.reset()
+    this.editGoalForm.reset();
   }
 
-  updateUserWithGoals() {
+  private populateEditForm(goal: Goal) {
+    this.editGoalForm.patchValue({
+      goalName: goal.name,
+      description: goal.description,
+      date: goal.date
+    });
+  }
+
+  private updateUserWithGoals() {
     this.userWithGoalsSubject.next(this.userWithGoals);
     this.usersWithGoalsService.updateUser(this.userWithGoals).subscribe({
       next: (response: any) => {
