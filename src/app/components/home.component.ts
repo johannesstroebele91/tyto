@@ -1,4 +1,4 @@
-import {Component,  OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {
   MatCard,
   MatCardActions,
@@ -57,7 +57,13 @@ import {MatSelectModule} from "@angular/material/select";
     MatCardFooter,
     MatCardActions,
     CdkTextareaAutosize,
-    MatFormFieldModule, MatSelectModule, MatInputModule, TextFieldModule, MatDatepicker, MatDatepickerInput, MatDatepickerToggle
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    TextFieldModule,
+    MatDatepicker,
+    MatDatepickerInput,
+    MatDatepickerToggle
   ],
   template: `
     <div style="margin-left: 30px">
@@ -149,16 +155,14 @@ import {MatSelectModule} from "@angular/material/select";
 })
 export class HomeComponent implements OnInit, OnDestroy {
   userWithGoals!: UserWithGoals;
-  editGoalForm: FormGroup;
-
-  private userWithGoalsSubject: BehaviorSubject<UserWithGoals>;
-  private userWithGoalsSubscription: Subscription | undefined;
-
   addGoalForm = new FormGroup({
     goalName: new FormControl('', Validators.required),
     description: new FormControl(''),
     date: new FormControl('')
   });
+  editGoalForm: FormGroup;
+  private userWithGoalsSubject: BehaviorSubject<UserWithGoals>;
+  private userWithGoalsSubscription: Subscription | undefined;
 
   constructor(
     private route: ActivatedRoute,
@@ -173,27 +177,29 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.usersWithGoalsService.getUser(this.route.snapshot.params['id']).subscribe({
-      next: (response: any) => {
-        this.userWithGoals = response;
-        this.userWithGoalsSubject.next(this.userWithGoals);
-        console.log(this.userWithGoals)
-        console.log("Getting the user was successful");
-      },
-      error: (error: any) => {
-        console.error('Error on getting user:', error);
-      }
-    });
+    const userId = this.route.snapshot.params['id']
+    if (userId) {
+      this.usersWithGoalsService.getUser(userId).subscribe({
+        next: (response: any) => {
+          this.userWithGoals = response;
+          this.userWithGoalsSubject.next(this.userWithGoals);
+          console.log("Getting the user was successful");
 
-    this.userWithGoalsSubscription = this.userWithGoalsSubject.subscribe(userWithGoals => {
-      if (userWithGoals) {
-        this.userWithGoals = userWithGoals;
-        const editedGoal = this.userWithGoals.goals.find(goal => goal.editing);
-        if (editedGoal) {
-          this.populateEditForm(editedGoal);
+          this.userWithGoalsSubscription = this.userWithGoalsSubject.subscribe(userWithGoals => {
+            if (userWithGoals) {
+              this.userWithGoals = userWithGoals;
+              const editedGoal = this.userWithGoals.goals?.find(goal => goal.editing);
+              if (editedGoal) {
+                this.populateEditForm(editedGoal);
+              }
+            }
+          });
+        },
+        error: (error: any) => {
+          console.error('Error on getting user:', error);
         }
-      }
-    });
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -201,13 +207,19 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   onAddGoal() {
-    const name = this.addGoalForm.value.goalName;
-    const description = this.addGoalForm.value.description;
-    const date = this.addGoalForm.value.date;
-    if (name && description && date) {
-      this.userWithGoals?.goals?.unshift({ name, description, date: new Date(date), editing: false });
+    const name = this.addGoalForm.value.goalName!;
+    const description = this.addGoalForm.value.description || undefined;
+    const date = this.addGoalForm.value.date ? new Date(this.addGoalForm.value.date) : undefined;
+    if (this.userWithGoals?.goals?.length > 0 && name) {
+      this.userWithGoals?.goals?.unshift({name, description, date, editing: false});
+      console.log('this.userWithGoals')
+      console.log(this.userWithGoals)
       this.updateUserWithGoals();
       this.addGoalForm.reset();
+    } else {
+      this.userWithGoals = {...this.userWithGoals, goals: [{name, description, date, editing: false}]}
+      console.log('this.userWithGoals')
+      console.log(this.userWithGoals)
     }
   }
 
@@ -243,6 +255,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.usersWithGoalsService.updateUser(this.userWithGoals).subscribe({
       next: (response: any) => {
         console.log("User goals updated successfully", response);
+        console.log(this.userWithGoals)
       },
       error: (error: any) => {
         console.error('Error updating user goals:', error);

@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Goal, UserWithGoals} from "../shared/models";
+import {UserWithGoals} from "../shared/models";
 import {Observable} from "rxjs";
 
 interface ResponseData {
@@ -18,14 +18,10 @@ export class UsersWithGoalsService {
   http = inject(HttpClient);
 
   createUserWithDefaultGoals(id: string, name: string): Observable<{ name: string }> {
-    const goals: Goal[] = [
-      {name: 'Test goal', editing: false},
-    ];
-
     const userWithGoals: UserWithGoals = {
       id: id,
       name: name,
-      goals: goals,
+      goals: [],
     }
 
     return this.http.put<{
