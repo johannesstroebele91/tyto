@@ -178,12 +178,16 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const userId = this.route.snapshot.params['id']
+    console.log('userId')
+    console.log(userId)
     if (userId) {
       this.usersWithGoalsService.getUser(userId).subscribe({
         next: (response: any) => {
           this.userWithGoals = response;
           this.userWithGoalsSubject.next(this.userWithGoals);
-          console.log("Getting the user was successful");
+          console.log("Getting the user was successful", response);
+          console.log(this.userWithGoals);
+          console.log("Getting the user was successful", response);
 
           this.userWithGoalsSubscription = this.userWithGoalsSubject.subscribe(userWithGoals => {
             if (userWithGoals) {

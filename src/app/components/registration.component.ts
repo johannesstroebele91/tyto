@@ -14,7 +14,6 @@ import {MatIcon} from "@angular/material/icon";
 import {MatInput} from "@angular/material/input";
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 import {Router, RouterLink} from "@angular/router";
-import {HttpClient} from "@angular/common/http";
 import {AuthService} from "../services/auth.service";
 import {ERROR_MESSAGE} from "../shared/constants";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
@@ -162,7 +161,6 @@ import {UsersWithGoalsService} from "../services/users-with-goals.service";
   `,
 })
 export class RegistrationComponent {
-  http = inject(HttpClient);
   router = inject(Router);
   authService = inject(AuthService);
   usersWithGoalsService = inject(UsersWithGoalsService);
@@ -184,10 +182,6 @@ export class RegistrationComponent {
 
   get email(): any {
     return this.signupForm.get('email');
-  }
-
-  get password(): any {
-    return this.signupForm.get('password');
   }
 
   onSubmit() {
@@ -213,17 +207,18 @@ export class RegistrationComponent {
           next: (response: AuthResponseData) => {
             this.usersWithGoalsService.createUserWithDefaultGoals(response.localId, name).subscribe({
               next: () => {
-                console.log("Create a user on FireBase was successful")
+                console.log("Create a user on Firebase was successful");
+                // Navigate to the home page after user creation
+                this.router.navigate([`/home/${response.localId}`]);
+                this.isLoading = false;
               },
               error: (error) => {
                 this.requestErrorMessage = error;
                 console.error('Error on sign in:', error);
               }
-            })
-            this.router.navigate([`/home/${response.localId}`]);
-            this.isLoading = false;
+            });
           }
-        })
+        });
     }
   }
 }
