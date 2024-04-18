@@ -66,8 +66,8 @@ import {MatSelectModule} from "@angular/material/select";
     MatDatepickerToggle
   ],
   template: `
-    <div style="margin-left: 30px">
-      <h1>Hey {{ userWithGoals?.name }}!</h1>
+    <div style="margin-left: 30px" *ngIf="userWithGoals">
+      <h1>Hey {{ userWithGoals.name }}</h1>
       <h3>Here, you can view and edit your goals and add new ones.</h3>
     </div>
     <div style="display: flex;  flex-wrap: wrap">
