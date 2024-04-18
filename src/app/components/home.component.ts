@@ -238,6 +238,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   cancelEdit(goal: Goal) {
     goal.editing = false;
+    this.updateUserWithGoals();
     this.editGoalForm.reset();
   }
 
