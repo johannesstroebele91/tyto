@@ -155,12 +155,17 @@ import {MatSelectModule} from "@angular/material/select";
 })
 export class HomeComponent implements OnInit, OnDestroy {
   userWithGoals!: UserWithGoals;
-  addGoalForm = new FormGroup({
+  addGoalForm: FormGroup = new FormGroup({
     goalName: new FormControl('', Validators.required),
     description: new FormControl(''),
     date: new FormControl('')
   });
-  editGoalForm: FormGroup;
+  editGoalForm: FormGroup = new FormGroup({
+    goalName: new FormControl('', Validators.required),
+    description: new FormControl(''),
+    date: new FormControl('')
+  });
+
   private userWithGoalsSubject: BehaviorSubject<UserWithGoals>;
   private userWithGoalsSubscription: Subscription | undefined;
 
@@ -169,17 +174,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     private usersWithGoalsService: UsersWithGoalsService,
   ) {
     this.userWithGoalsSubject = new BehaviorSubject<UserWithGoals>(this.userWithGoals);
-    this.editGoalForm = new FormGroup({
-      goalName: new FormControl('', Validators.required),
-      description: new FormControl(''),
-      date: new FormControl('')
-    });
   }
 
   ngOnInit(): void {
     const userId = this.route.snapshot.params['id']
-    console.log('userId')
-    console.log(userId)
     if (userId) {
       this.usersWithGoalsService.getUser(userId).subscribe({
         next: (response: any) => {
@@ -221,30 +219,21 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.userWithGoals = {...this.userWithGoals, goals: [{name, description, date, editing: false}]}
       }
       this.updateUserWithGoals();
-      this.addGoalForm.reset();
     }
+    this.addGoalForm.reset();
   }
 
-  editGoal(goal?: Goal) {
-    if (goal?.name) {
-      goal.editing = true;
-      this.updateUserWithGoals();
-    }
+  editGoal(goal: Goal) {
+    goal.editing = true;
+    this.updateUserWithGoals();
   }
 
   saveGoal(goal: Goal) {
-    console.log('updateUserWithGoals')
-    console.log(this.userWithGoals)
-    console.log(goal)
-
-    if (goal) {
-      goal.editing = false;
-      this.populateEditForm(goal);
-      goal.name = this.editGoalForm.value.goalName;
-      goal.description = this.editGoalForm.value.description;
-      goal.date = this.editGoalForm.value.date;
-      this.updateUserWithGoals();
-    }
+    goal.editing = false;
+    goal.name = this.editGoalForm.value.goalName;
+    goal.description = this.editGoalForm.value.description;
+    goal.date = this.editGoalForm.value.date;
+    this.updateUserWithGoals();
   }
 
   cancelEdit(goal: Goal) {
