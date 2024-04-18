@@ -108,7 +108,7 @@ import {MatSelectModule} from "@angular/material/select";
             </mat-card-header>
             <div style="padding-left: 16px">
               <p style="padding-top: 20px; font-weight: 500">{{ goal.description }}</p>
-              <p style="padding-top: 10px">{{ goal.date }}</p>
+              <p style="padding-top: 10px">{{ goal.date  | date:'d. MMMM yyyy' }}</p>
             </div>
             <button mat-icon-button (click)="editGoal(goal)"
                     style="position: absolute; top: 0; right: 0; margin: 20px 20px 0 0;">
