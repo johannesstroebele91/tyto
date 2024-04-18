@@ -210,16 +210,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     const name = this.addGoalForm.value.goalName!;
     const description = this.addGoalForm.value.description || undefined;
     const date = this.addGoalForm.value.date ? new Date(this.addGoalForm.value.date) : undefined;
-    if (this.userWithGoals?.goals?.length > 0 && name) {
-      this.userWithGoals?.goals?.unshift({name, description, date, editing: false});
-      console.log('this.userWithGoals')
-      console.log(this.userWithGoals)
+    if (name) {
+      if (this.userWithGoals?.goals?.length > 0) {
+        this.userWithGoals?.goals?.unshift({name, description, date, editing: false});
+        console.log('this.userWithGoals')
+        console.log(this.userWithGoals)
+      } else {
+        this.userWithGoals = {...this.userWithGoals, goals: [{name, description, date, editing: false}]}
+        console.log('this.userWithGoals')
+        console.log(this.userWithGoals)
+      }
       this.updateUserWithGoals();
       this.addGoalForm.reset();
-    } else {
-      this.userWithGoals = {...this.userWithGoals, goals: [{name, description, date, editing: false}]}
-      console.log('this.userWithGoals')
-      console.log(this.userWithGoals)
     }
   }
 
