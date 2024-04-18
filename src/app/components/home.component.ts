@@ -74,7 +74,7 @@ import {MatSelectModule} from "@angular/material/select";
       <!-- Add goal -->
       <mat-card style="width: 300px; min-height: 250px; margin: 30px; padding: 20px">
         <mat-card-content>
-          <form [formGroup]="addGoalForm" (ngSubmit)="onAddGoal()">
+          <form [formGroup]="addGoalForm" (ngSubmit)="addGoal()">
             <mat-form-field [appearance]="'outline'" style="width: 100%">
               <mat-label>Goal</mat-label>
               <input matInput formControlName="goalName" placeholder="Insert name">
@@ -110,14 +110,14 @@ import {MatSelectModule} from "@angular/material/select";
               <p style="padding-top: 20px; font-weight: 500">{{ goal.description }}</p>
               <p style="padding-top: 10px">{{ goal.date }}</p>
             </div>
-            <button mat-icon-button (click)="onEditGoal(goal)"
+            <button mat-icon-button (click)="editGoal(goal)"
                     style="position: absolute; top: 0; right: 0; margin: 20px 20px 0 0;">
               <mat-icon>edit</mat-icon>
             </button>
           </mat-list-item>
           <mat-list-item *ngIf="goal.editing">
             <mat-card-content>
-              <form [formGroup]="editGoalForm" (ngSubmit)="onSaveGoal(goal)">
+              <form [formGroup]="editGoalForm" (ngSubmit)="saveGoal(goal)">
                 <mat-form-field [appearance]="'outline'" style="width: 100%">
                   <mat-label>Goal</mat-label>
                   <input matInput formControlName="goalName" placeholder="Insert name">
@@ -206,36 +206,40 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.userWithGoalsSubscription?.unsubscribe();
   }
 
-  onAddGoal() {
+  addGoal() {
     const name = this.addGoalForm.value.goalName!;
     const description = this.addGoalForm.value.description || undefined;
     const date = this.addGoalForm.value.date ? new Date(this.addGoalForm.value.date) : undefined;
     if (name) {
       if (this.userWithGoals?.goals?.length > 0) {
         this.userWithGoals?.goals?.unshift({name, description, date, editing: false});
-        console.log('this.userWithGoals')
-        console.log(this.userWithGoals)
       } else {
         this.userWithGoals = {...this.userWithGoals, goals: [{name, description, date, editing: false}]}
-        console.log('this.userWithGoals')
-        console.log(this.userWithGoals)
       }
       this.updateUserWithGoals();
       this.addGoalForm.reset();
     }
   }
 
-  onEditGoal(goal?: Goal) {
-    if (goal) {
+  editGoal(goal?: Goal) {
+    if (goal?.name) {
       goal.editing = true;
-      this.populateEditForm(goal);
+      this.updateUserWithGoals();
     }
   }
 
-  onSaveGoal(goal: Goal) {
+  saveGoal(goal: Goal) {
+    console.log('updateUserWithGoals')
+    console.log(this.userWithGoals)
+    console.log(goal)
+
     if (goal) {
-      this.updateUserWithGoals();
       goal.editing = false;
+      this.populateEditForm(goal);
+      goal.name = this.editGoalForm.value.goalName;
+      goal.description = this.editGoalForm.value.description;
+      goal.date = this.editGoalForm.value.date;
+      this.updateUserWithGoals();
     }
   }
 
@@ -244,24 +248,25 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.editGoalForm.reset();
   }
 
+  private updateUserWithGoals() {
+    console.log('updateUserWithGoals')
+    console.log(this.userWithGoals)
+    this.userWithGoalsSubject.next(this.userWithGoals);
+    this.usersWithGoalsService.updateUser(this.userWithGoals).subscribe({
+      next: (response: any) => {
+        console.log("User goals updated successfully", response);
+      },
+      error: (error: any) => {
+        console.error('Error updating user goals:', error);
+      }
+    });
+  }
+
   private populateEditForm(goal: Goal) {
     this.editGoalForm.patchValue({
       goalName: goal.name,
       description: goal.description,
       date: goal.date
-    });
-  }
-
-  private updateUserWithGoals() {
-    this.userWithGoalsSubject.next(this.userWithGoals);
-    this.usersWithGoalsService.updateUser(this.userWithGoals).subscribe({
-      next: (response: any) => {
-        console.log("User goals updated successfully", response);
-        console.log(this.userWithGoals)
-      },
-      error: (error: any) => {
-        console.error('Error updating user goals:', error);
-      }
     });
   }
 }
