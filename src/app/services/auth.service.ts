@@ -4,11 +4,11 @@ import {catchError} from 'rxjs/operators';
 import {AuthLoginUser, AuthResponseData, AuthUser} from '../shared/models';
 import {HttpClient, HttpErrorResponse} from "@angular/common/http";
 import {Router} from "@angular/router";
+import {environment} from "../../environments/environment";
 
 const IDENTITY_URL = 'https://identitytoolkit.googleapis.com/v1/accounts:';
 const URL_KEY = '?key='
 const MILLI_SECONDS = 1000;
-const KEY = 'AIzaSyANHm9Q65Ck16fgkSowNkg4DBB2EXQs2as';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +20,7 @@ export class AuthService {
   private tokenExpirationTimer: any;
 
   signup(user: AuthLoginUser) {
-    return this.http.post<AuthResponseData>(IDENTITY_URL + 'signUp' + URL_KEY + KEY, {
+    return this.http.post<AuthResponseData>(IDENTITY_URL + 'signUp' + URL_KEY + environment.key, {
       email: user.email, password: user.password, returnSecureToken: true
     }).pipe(catchError(this.handleError), tap((resData) => {
       this.handleAuthentication(
@@ -33,7 +33,7 @@ export class AuthService {
 
 
   login(user: AuthLoginUser) {
-    return this.http.post<AuthResponseData>(IDENTITY_URL + 'signInWithPassword' + URL_KEY + KEY, {
+    return this.http.post<AuthResponseData>(IDENTITY_URL + 'signInWithPassword' + URL_KEY + environment.key, {
       email: user.email, password: user.password, returnSecureToken: true
     }).pipe(catchError(this.handleError), tap((resData) => {
       this.handleAuthentication(
