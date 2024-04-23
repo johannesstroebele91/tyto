@@ -21,9 +21,10 @@ import {AuthResponseData} from "../shared/models";
     >
       <mat-card-header style="display: block; margin-bottom: 30px">
         <mat-card-title style=" font-size: 36px">Welcome!</mat-card-title>
-        <mat-card-subtitle style="margin: 30px auto 10px auto; font-size: 24px;"
-        >Stay focus and complete your goals
+        <mat-card-subtitle style="margin: 30px auto 10px auto;"
+        >Tyto is a goal tracker that enables you to<br>add, view, and edit your goals
         </mat-card-subtitle>
+
       </mat-card-header>
       <mat-card-content>
         <form (ngSubmit)="onSubmit()">
