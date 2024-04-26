@@ -17,7 +17,16 @@ Tyto is a cloud-based application designed to boost your productivity using the 
 - Data Storing: Retrieves and stores data efficiently using Firebase's services.
 - Vercel Deployment: Leverages Vercel's serverless platform for scalability and reliability.
 
-# Development and Deployment
+# Learnings
+
+- Angular Material reactive forms 
+- Angular GET-, PUT-, POST-requests with realtime Firebase
+- Email/Password registration and login via Firebase authentication 
+- Protect routs with authentication guards
+- Interceptors for checking authentication automatically for each request
+- Deployment with Vercel
+
+- # Development and Deployment
 
 - Development Server: Run ng serve for a local development server accessible at http://localhost:4040/. Changes to source files trigger automatic reloading.
 - Build: Run ng build to create production-ready build artifacts stored in the dist/ directory. Use the --prod flag for optimized production builds.
