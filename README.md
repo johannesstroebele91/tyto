@@ -1,12 +1,12 @@
-# Tyto: Pomodoro Productivity Tracker
+# Tyto: Goal Tracking App
 
-Tyto is a cloud-based application designed to boost your productivity using the Pomodoro Technique. It allows you to set focused 25-minute work intervals, helping you achieve more throughout your day. This project utilizes TypeScript, Angular, Angular Material, Firebase Authentication, and Vercel for a smooth, performant, and cross-platform user experience.
+Tyto is your dedicated companion for achieving your goals efficiently. This intuitive goal tracking application empowers you to seamlessly add, view, and edit your goals, keeping you on track to success. Built with TypeScript, Angular, Angular Material, Firebase Authentication, and Vercel, Tyto offers a fluid, responsive, and cross-platform user experience.
 
 # Features
 
-- 25-Minute Pomodoro Timer: Set and track your work intervals with a clean and intuitive interface.
-- Start/Stop and Reset Buttons: Easily control your timer and start fresh whenever needed.
-- Login and Registration: Securely register and log in using your email and password.
+- Goal Management: Effortlessly add, organize, and prioritize your goals for clear visibility and focused progress.
+- Add, View, and Edit Goals: Easily add, access, and update your goals to adapt to changing priorities and circumstances.
+- Secure Login and Registration: Safely register and log in using your email and password to keep your goal-setting journey private and secure.
 
 # Technology
 
